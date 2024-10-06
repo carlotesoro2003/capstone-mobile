@@ -11,12 +11,14 @@ const AdminDashboard = () => {
   const user = useUser();
   const [loading, setLoading] = useState(false); // Loading state
 
+  // Function to handle logout
   async function signOut() {
     setLoading(true); // Set loading to true
-    await supabase.auth.signOut();
+    await supabase.auth.signOut(); // Sign out from Supabase
     setLoading(false); // Set loading to false after sign out
   }
 
+  // Sample data for the charts
   const lineData = {
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     datasets: [

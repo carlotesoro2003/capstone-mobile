@@ -5,9 +5,14 @@ import { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import AdminDashboard from "./components/Admin/AdminDashboard";
-import DepartmentDashboard from "./components/DepartmentHead/DepartmentDashboard";
 import AdminProfile from "./components/Admin/AdminProfile";
+
+import DepartmentDashboard from "./components/DepartmentHead/DepartmentDashboard";
+import DepartmentProfile from "./components/DepartmentHead/DepartmentProfile";
+
 import Login from "./components/Login";
+import Logout from "./components/Logout";
+
 import CustomDrawerContent from "./components/CustomDrawer";
 
 const Drawer = createDrawerNavigator();
@@ -88,13 +93,30 @@ const Main = () => {
             component={AdminProfile}
             options={{ title: 'My Profile' }}
           />
+          <Drawer.Screen
+            name="Logout"
+            component={Logout}
+            options={{ title: 'Log Out' }}
+          />
         </>
       ) : (
-        <Drawer.Screen
-          name="DepartmentDashboard"
-          component={DepartmentDashboard}
-          options={{ title: 'Department Dashboard' }}
-        />
+        <>
+          <Drawer.Screen
+            name="DepartmentDashboard"
+            component={DepartmentDashboard}
+            options={{ title: 'Dashboard' }}
+          />
+          <Drawer.Screen
+            name="DepartmentProfile"
+            component={DepartmentProfile}
+            options={{ title: 'Profile' }}
+          />
+             <Drawer.Screen
+            name="Logout"
+            component={Logout}
+            options={{ title: 'Log Out' }}
+          />
+        </>
       )}
     </Drawer.Navigator>
   ) : null; // Render nothing if role is not available

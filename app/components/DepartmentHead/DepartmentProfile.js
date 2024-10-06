@@ -1,49 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-  ActivityIndicator,
-  Image,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from '../../../supabaseClient';
 
-const AdminProfile = () => {
+const DepartmentProfile = () => {
+  // State for profile fields
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [profilePic, setProfilePic] = useState(null); // State for profile picture
-  const [profileExists, setProfileExists] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [profileExists, setProfileExists] = useState(false); // State to check if profile exists
+  const [loading, setLoading] = useState(false); // State for loading indicator
+
   const user = useUser();
 
+  // Load the user profile data if it exists
   useEffect(() => {
     const loadProfile = async () => {
       if (user) {
         setEmail(user.email);
 
+        // Check if the profile already exists
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
-          .single();
+          .single(); // Fetch a single record
 
         if (error) {
           console.error('Error fetching profile:', error.message);
           return;
         }
 
+        // If profile exists, populate the fields
         if (data) {
           setFirstName(data.first_name || '');
           setLastName(data.last_name || '');
-          setProfilePic(data.profile_pic || null); // Load profile pic
-          setProfileExists(true);
+          setProfileExists(true); // Set profileExists to true if a record is found
         }
       }
     };
@@ -51,15 +43,15 @@ const AdminProfile = () => {
     loadProfile();
   }, [user]);
 
+  // Insert function to add a new profile
   const handleInsert = async () => {
     const { error } = await supabase
       .from('profiles')
       .insert({
-        id: user.id,
+        id: user.id, // Use the user's id as a unique identifier
         first_name: firstName,
         last_name: lastName,
         email: email,
-        profile_pic: profilePic, // Save profile picture URL
       });
 
     if (error) {
@@ -71,13 +63,13 @@ const AdminProfile = () => {
     Alert.alert('Success', 'Profile added successfully!');
   };
 
+  // Update function to update the existing profile
   const handleUpdate = async () => {
     const { error } = await supabase
       .from('profiles')
       .update({
         first_name: firstName,
         last_name: lastName,
-        profile_pic: profilePic, // Update profile picture URL
       })
       .eq('id', user.id);
 
@@ -86,58 +78,23 @@ const AdminProfile = () => {
       Alert.alert('Error', 'Error updating profile. Please try again.');
       return;
     }
-
+    
     Alert.alert('Success', 'Profile updated successfully!');
   };
 
   const handleSave = async () => {
-    setLoading(true);
+    setLoading(true); // Show loading indicator
     if (profileExists) {
-      await handleUpdate();
+      await handleUpdate(); // If profile exists, update it
     } else {
-      await handleInsert();
+      await handleInsert(); // If profile doesn't exist, insert it
     }
-    setLoading(false);
-  };
-
-  const pickImage = async () => {
-    // Request permission to access the camera roll
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (permissionResult.granted === false) {
-      Alert.alert('Permission to access camera roll is required!');
-      return;
-    }
-
-    // Launch image picker
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    // Check if user canceled the image picker
-    if (!result.canceled) {
-      setProfilePic(result.assets[0].uri); // Set the selected image URI
-    }
+    setLoading(false); // Hide loading indicator
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>My Profile</Text>
-
-      {/* Profile Picture Selection */}
-      <View style={styles.imageContainer}>
-        {profilePic ? (
-          <Image source={{ uri: profilePic }} style={styles.profileImage} />
-        ) : (
-          <Text style={styles.imagePlaceholder}>Pick a Profile Picture</Text>
-        )}
-        <TouchableOpacity style={styles.editButton} onPress={pickImage}>
-          <Text style={styles.editButtonText}>+</Text>
-        </TouchableOpacity>
-      </View>
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>First name</Text>
@@ -167,12 +124,12 @@ const AdminProfile = () => {
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
-          editable={false}
+          editable={false} // Disable editing for email
         />
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#007bff" />
+        <ActivityIndicator size="large" color="#007bff" /> // Show spinner if loading
       ) : (
         <TouchableOpacity style={styles.button} onPress={handleSave}>
           <Text style={styles.buttonText}>Save Changes</Text>
@@ -181,6 +138,8 @@ const AdminProfile = () => {
     </ScrollView>
   );
 };
+
+export default DepartmentProfile;
 
 const styles = StyleSheet.create({
   container: {
@@ -194,37 +153,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#333',
     textAlign: 'center',
-  },
-  imageContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-    position: 'relative', // Add position relative for absolute positioning
-  },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 10,
-  },
-  imagePlaceholder: {
-    fontSize: 16,
-    color: '#aaa',
-  },
-  editButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#007bff',
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 2, // Adds a shadow effect
-  },
-  editButtonText: {
-    color: '#fff',
-    fontSize: 18,
   },
   inputContainer: {
     marginBottom: 15,
@@ -256,5 +184,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
-export default AdminProfile;

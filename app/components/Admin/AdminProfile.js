@@ -1,28 +1,118 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { useUser } from '@supabase/auth-helpers-react';
+import { supabase } from '../../../supabaseClient';
 
-const EditProfile = () => {
+const AdminProfile = () => {
   // State for profile fields
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [profileExists, setProfileExists] = useState(false); // State to check if profile exists
+  const [loading, setLoading] = useState(false); // State for loading indicator
 
-  const handleSave = () => {
-    // Placeholder function for saving profile changes
-    console.log('Profile saved:', { name, email, phone });
+  const user = useUser();
+
+  // Load the user profile data if it exists
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (user) {
+        setEmail(user.email);
+
+        // Check if the profile already exists
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single(); // Fetch a single record
+
+        if (error) {
+          console.error('Error fetching profile:', error.message);
+          return;
+        }
+
+        // If profile exists, populate the fields
+        if (data) {
+          setFirstName(data.first_name || '');
+          setLastName(data.last_name || '');
+          setProfileExists(true); // Set profileExists to true if a record is found
+        }
+      }
+    };
+
+    loadProfile();
+  }, [user]);
+
+  // Insert function to add a new profile
+  const handleInsert = async () => {
+    const { error } = await supabase
+      .from('profiles')
+      .insert({
+        id: user.id, // Use the user's id as a unique identifier
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+      });
+
+    if (error) {
+      console.error('Error inserting profile:', error.message);
+      Alert.alert('Error', 'Error adding profile. Please try again.');
+      return;
+    }
+
+    Alert.alert('Success', 'Profile added successfully!');
+  };
+
+  // Update function to update the existing profile
+  const handleUpdate = async () => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        first_name: firstName,
+        last_name: lastName,
+      })
+      .eq('id', user.id);
+
+    if (error) {
+      console.error('Error updating profile:', error.message);
+      Alert.alert('Error', 'Error updating profile. Please try again.');
+      return;
+    }
+
+    Alert.alert('Success', 'Profile updated successfully!');
+  };
+
+  const handleSave = async () => {
+    setLoading(true); // Show loading indicator
+    if (profileExists) {
+      await handleUpdate(); // If profile exists, update it
+    } else {
+      await handleInsert(); // If profile doesn't exist, insert it
+    }
+    setLoading(false); // Hide loading indicator
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>Edit Profile</Text>
+      <Text style={styles.header}>My Profile</Text>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Name</Text>
+        <Text style={styles.label}>First name</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter your name"
-          value={name}
-          onChangeText={setName}
+          placeholder="Enter your first name"
+          value={firstName}
+          onChangeText={setFirstName}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Last name</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your last name"
+          value={lastName}
+          onChangeText={setLastName}
         />
       </View>
 
@@ -34,28 +124,22 @@ const EditProfile = () => {
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
+          editable={false} // Disable editing for email
         />
       </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Phone</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your phone number"
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-        />
-      </View>
-
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
-        <Text style={styles.buttonText}>Save Changes</Text>
-      </TouchableOpacity>
+      {loading ? (
+        <ActivityIndicator size="large" color="#007bff" /> // Show spinner if loading
+      ) : (
+        <TouchableOpacity style={styles.button} onPress={handleSave}>
+          <Text style={styles.buttonText}>Save Changes</Text>
+        </TouchableOpacity>
+      )}
     </ScrollView>
   );
 };
 
-export default EditProfile;
+export default AdminProfile;
 
 const styles = StyleSheet.create({
   container: {

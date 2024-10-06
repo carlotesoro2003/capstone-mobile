@@ -45,7 +45,6 @@ const AdminDashboard = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>AdminDashboard</Text>
 
       {/* Loading Spinner */}
       {loading && (

@@ -62,6 +62,7 @@ export default function Login() {
     try {
       await sendMagicLink(email); // Send the magic link
       Alert.alert("Check your email", "Magic link sent!"); // Show success alert
+      alert("Check your email for the magic link."); // Show success alert
     } catch (error) {
       Alert.alert("Error", error.message); // Show error alert
     } finally {

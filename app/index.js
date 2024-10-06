@@ -1,117 +1,112 @@
-import { StyleSheet, View, Text, Linking } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import { SessionContextProvider, useSession, useUser } from "@supabase/auth-helpers-react";
-import AdminDashboard from "./components/Admin/AdminDashboard";
-import DepartmentDashboard from "./components/DepartmentHead/DepartmentDashboard";
-import Login from "./components/Login";
 import { supabase } from "../supabaseClient";
 import { useEffect, useState } from "react";
-import { useRouter } from 'expo-router'; // Import useRouter
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import AdminDashboard from "./components/Admin/AdminDashboard";
+import DepartmentDashboard from "./components/DepartmentHead/DepartmentDashboard";
+import AdminProfile from "./components/Admin/AdminProfile";
+import Login from "./components/Login";
+import CustomDrawerContent from "./components/CustomDrawer";
+
+const Drawer = createDrawerNavigator();
 
 const Main = () => {
   const session = useSession();
   const user = useUser();
-  const router = useRouter(); // Use router from expo-router
   const [role, setRole] = useState(null);
-  const [loading, setLoading] = useState(false); // Set loading to true initially
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkInitialURL = async () => {
-      const initialURL = await Linking.getInitialURL();
-      if (initialURL) {
-        handleDeepLink(initialURL); // Handle the initial URL if it exists
+    const checkAndInsertUser = async () => {
+      if (user) {
+        try {
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", user.id)
+            .single();
+
+          if (error && error.code === 'PGRST116') {
+            // Insert a new profile with a default role
+            const { error: insertError } = await supabase
+              .from("profiles")
+              .insert([{ id: user.id, email: user.email, role: "user" }]);
+
+            if (insertError) {
+              alert("Error adding to profiles table: " + insertError.message);
+            } else {
+              alert("User added to profiles table");
+              setRole("user"); // Set default role to user
+            }
+          } else if (data) {
+            setRole(data.role); // Set role from existing profile
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+        } finally {
+          setLoading(false); // Stop loading when done
+        }
+      } else {
+        setLoading(false); // Stop loading if no user
       }
     };
 
-    if (user) {
-      checkAndInsertUser();
-    }
-
-    const handleDeepLink = (url) => {
-      const route = url.replace(/.*?:\/\//g, ""); // Extract the path from the URL
-      console.log("Deep link route:", route); // Log the route for debugging
-
-      // Handle different routes based on the path
-      switch (route) {
-        case "capstone.route/dashboard":
-          router.push('/main/DepartmentDashboard'); // Navigate to Department Dashboard
-          break;
-        case "capstone.route/admin":
-          router.push('/main/AdminDashboard'); // Navigate to Admin Dashboard
-          break;
-        case "capstone.route/profile":
-          router.push('/main/AdminProfile'); // Navigate to Admin Profile
-          break;
-        default:
-          console.log("No matching route found."); // Handle unknown routes
-          break;
-      }
-    };
-
-    // Check for deep links on app launch
-    checkInitialURL();
-
-    // Add event listener for deep links when the app is open
-    const linkingListener = Linking.addEventListener("url", ({ url }) => handleDeepLink(url));
-
-    // Clean up the listener on unmount
-    return () => {
-      linkingListener.remove(); // Correct way to unsubscribe
-    };
+    checkAndInsertUser();
   }, [user]);
 
-  async function checkAndInsertUser() {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (error && error.code === 'PGRST116') {
-        const { error: insertError } = await supabase
-          .from("profiles")
-          .insert([{ id: user.id, email: user.email, role: "user" }]);
-
-        if (insertError) {
-          alert("Error adding to profiles table: " + insertError.message);
-        } else {
-          alert("User added to profiles table");
-          setRole("user");
-        }
-      } else if (data) {
-        setRole(data.role);
-      }
-    } catch (error) {
-      console.error("Error fetching user role:", error);
-    } finally {
-      setLoading(false); // End loading state
-    }
-  }
-
   if (loading) {
+    // Render a loading state while checking role
     return (
       <View style={styles.container}>
-        <Text>Loading...</Text> 
+        <Text>Loading...</Text>
       </View>
     );
   }
 
-  return (
-    <View style={styles.container}>
-      {session ? (
-        role === "admin" ? <AdminDashboard /> : <DepartmentDashboard />
+  // Render Login screen when not authenticated
+  if (!session) {
+    return <Login />;
+  }
+
+  // Render only when role is available
+  return role ? (
+    <Drawer.Navigator
+      initialRouteName={role === "admin" ? "AdminDashboard" : "DepartmentDashboard"}
+      drawerContent={(props) => <CustomDrawerContent {...props} />}  // Use custom drawer
+    >
+      {role === "admin" ? (
+        <>
+          <Drawer.Screen
+            name="AdminDashboard"
+            component={AdminDashboard}
+            options={{ title: 'Dashboard' }}
+          />
+          <Drawer.Screen
+            name="AdminProfile"
+            component={AdminProfile}
+            options={{ title: 'My Profile' }}
+          />
+        </>
       ) : (
-        <Login />
+        <Drawer.Screen
+          name="DepartmentDashboard"
+          component={DepartmentDashboard}
+          options={{ title: 'Department Dashboard' }}
+        />
       )}
-    </View>
-  );
+    </Drawer.Navigator>
+  ) : null; // Render nothing if role is not available
 };
 
 export default function Page() {
   return (
-    <SessionContextProvider supabaseClient={supabase}>
-      <Main />
-    </SessionContextProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SessionContextProvider supabaseClient={supabase}>
+        <Main />
+      </SessionContextProvider>
+    </GestureHandlerRootView>
   );
 }
 

@@ -1,8 +1,11 @@
-import { StyleSheet } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { Stack, Tabs } from 'expo-router';
+import { Drawer } from 'expo-router';
 import { useSession, useUser } from "@supabase/auth-helpers-react";
 import { supabase } from '../../supabaseClient';
+import AdminDashboard from './Admin/AdminDashboard';
+import DepartmentDashboard from './DepartmentHead/DepartmentDashboard';
+import AdminProfile from './Admin/AdminProfile';
+import Login from './Login';
+import React, { useEffect, useState } from 'react';
 
 const _layout = () => {
   const session = useSession();
@@ -10,72 +13,58 @@ const _layout = () => {
   const [role, setRole] = useState(null);
 
   useEffect(() => {
-    if (user) {
-      fetchUserRole();
+    async function fetchUserRole() {
+      if (user) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+          if (error) throw error;
+          if (data) setRole(data.role);
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+        }
+      }
     }
+
+    fetchUserRole();
   }, [user]);
 
-  async function fetchUserRole() {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-
-      if (data) {
-        setRole(data.role);
-      }
-    } catch (error) {
-      console.error("Error fetching user role:", error);
-    }
-  }
-
   return (
-    <Stack>
-      {/* Login screen as the initial screen */}
-      <Stack.Screen
-        name="index"
-        options={{ title: 'Login' }}
-      />
-
-      {/* Tabs for Dashboard based on role */}
-      <Stack.Screen
-        name="main"
-        options={{ headerShown: false }} // Hide header for tabs
-      >
-        {() => (
-          <Tabs>
-            {/* Conditionally render Admin tabs */}
-            {role === "admin" ? (
-              <>
-                {/* Admin Dashboard Tab */}
-                <Tabs.Screen
-                  name="AdminDashboard"
-                  options={{ title: 'Admin Dashboard' }}
-                />
-                {/* Admin Profile Tab */}
-                <Tabs.Screen
-                  name="AdminProfile"
-                  options={{ title: 'Admin Profile' }}
-                />
-              </>
-            ) : (
-              <>
-                {/* Department Dashboard Tab */}
-                <Tabs.Screen
-                  name="DepartmentDashboard"
-                  options={{ title: 'Department Dashboard' }}
-                />
-              </>
-            )}
-          </Tabs>
-        )}
-      </Stack.Screen>
-    </Stack>
+    <Drawer>
+      {session ? (
+        role === "admin" ? (
+          <>
+            <Drawer.Screen
+              name="AdminDashboard"
+              options={{ title: 'Dashboard' }}
+              component={AdminDashboard}
+            />
+            <Drawer.Screen
+              name="AdminProfile"
+              op    tions={{ title: 'Profile' }}
+              component={AdminProfile}
+            />
+          </>
+        ) : (
+          <Drawer.Screen
+            name="DepartmentDashboard"
+            options={{ title: 'Department Dashboard' }}
+            component={DepartmentDashboard}
+          />
+        )
+      ) : (
+        <Drawer.Screen
+          name="Login"
+          options={{ title: 'Login' }}
+          component={Login}
+        />
+      )}
+    </Drawer>
   );
 };
 
 export default _layout;
-
-const styles = StyleSheet.create({});

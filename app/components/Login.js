@@ -1,35 +1,73 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator } from "react-native";
-import { useRouter } from "expo-router"; // For navigation
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
+import { makeRedirectUri } from "expo-auth-session";
+import * as QueryParams from "expo-auth-session/build/QueryParams";
+import * as WebBrowser from "expo-web-browser";
+import * as Linking from "expo-linking";
+import { supabase } from "../../supabaseClient";
 import { FontAwesome } from "@expo/vector-icons"; // For icons
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react"; // For Supabase client and user state
+
+WebBrowser.maybeCompleteAuthSession(); // Required for web only
+const redirectTo = makeRedirectUri(); // Create a redirect URI
+
+const createSessionFromUrl = async (url) => {
+  const { params, errorCode } = QueryParams.getQueryParams(url);
+
+  if (errorCode) throw new Error(errorCode);
+  const { access_token, refresh_token } = params;
+
+  if (!access_token) return;
+
+  const { data, error } = await supabase.auth.setSession({
+    access_token,
+    refresh_token,
+  });
+
+  if (error) throw error;
+  return data.session;
+};
+
+const sendMagicLink = async (email) => {
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: redirectTo,
+    },
+  });
+
+  if (error) throw error; // Handle error if email sending fails
+};
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState(""); // State for email input
+  const [loading, setLoading] = useState(false); // State for loading indicator
+  const url = Linking.useURL(); // Get URL to handle deep links
 
-  const router = useRouter();
-  const supabase = useSupabaseClient();
-  const user = useUser(); // Get the current user
-
-  async function getEmailLink() {
-    setLoading(true); // Start loading when login begins
-    const { error } = await supabase.auth.signInWithOtp({ email });
-    setLoading(false); // Stop loading when login process completes
-    if (error) {
-      alert(error.message);
-    } else {
-      alert("Link Successfully Created... Check your email for the link");
-    }
-  }
-
-  // Listen for user state changes
   useEffect(() => {
-    if (user) {
-      // Navigate to the dashboard when the user is authenticated
-      router.push("/components/Dashboard");
+    if (url) {
+      createSessionFromUrl(url).catch((error) => console.error("Session Error:", error));
     }
-  }, [user, router]);
+  }, [url]);
+
+  const handleMagicLink = async () => {
+    setLoading(true); // Set loading state
+    try {
+      await sendMagicLink(email); // Send the magic link
+      Alert.alert("Check your email", "Magic link sent!"); // Show success alert
+    } catch (error) {
+      Alert.alert("Error", error.message); // Show error alert
+    } finally {
+      setLoading(false); // Reset loading state
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -39,28 +77,33 @@ export default function Login() {
       </View>
 
       <View style={styles.inputContainer}>
-        <FontAwesome name="envelope" size={24} color="#333" style={styles.icon} />
+        <FontAwesome name="envelope" size={20} color="#333" style={styles.icon} />
         <TextInput
           style={styles.input}
           placeholder="Email"
-          placeholderTextColor="#666"
-          onChangeText={(text) => setEmail(text)}
           value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          placeholderTextColor="#aaa"
         />
       </View>
-
+      
       <TouchableOpacity
         style={styles.loginButton}
-        onPress={getEmailLink} 
-        disabled={loading} 
+        onPress={handleMagicLink}
+        disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator size="small" color="#fff" />
+          <ActivityIndicator size="small" color="#ffffff" />
         ) : (
-          <Text style={styles.loginText}>Login</Text>
+          <Text style={styles.loginText}>Send Magic Link</Text>
         )}
       </TouchableOpacity>
-
+      
+      <TouchableOpacity onPress={() => Alert.alert("Forgot Password", "Password reset link will be sent.")}>
+        <Text style={styles.forgotText}>Forgot your password?</Text>
+      </TouchableOpacity>
     </View>
   );
 }

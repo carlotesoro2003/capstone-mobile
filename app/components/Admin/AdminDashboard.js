@@ -4,6 +4,7 @@ import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'; // For Supabase client and user state
 
 const screenWidth = Dimensions.get('window').width;
+const chartHeight = 220; // Fixed height for mobile charts
 
 const AdminDashboard = () => {
   const supabase = useSupabaseClient();
@@ -58,8 +59,8 @@ const AdminDashboard = () => {
       <Text style={styles.chartTitle}>Income Trend</Text>
       <LineChart
         data={lineData}
-        width={screenWidth}
-        height={220}
+        width={screenWidth - 20} // Make the width responsive
+        height={chartHeight} // Fixed height
         chartConfig={chartConfig}
         bezier
         style={styles.chart}
@@ -69,8 +70,8 @@ const AdminDashboard = () => {
       <Text style={styles.chartTitle}>Weekly Sales</Text>
       <BarChart
         data={barData}
-        width={screenWidth}
-        height={220}
+        width={screenWidth - 20} // Make the width responsive
+        height={chartHeight} // Fixed height
         yAxisLabel="$"
         chartConfig={chartConfig}
         style={styles.chart}
@@ -80,8 +81,8 @@ const AdminDashboard = () => {
       <Text style={styles.chartTitle}>Expense Breakdown</Text>
       <PieChart
         data={pieData}
-        width={screenWidth}
-        height={220}
+        width={screenWidth - 20} // Make the width responsive
+        height={chartHeight} // Fixed height
         chartConfig={chartConfig}
         accessor="population"
         backgroundColor="transparent"

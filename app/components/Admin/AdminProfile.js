@@ -13,7 +13,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from '../../../supabaseClient';
-
+ 
 const AdminProfile = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -38,7 +38,7 @@ const AdminProfile = () => {
           console.error('Error fetching profile:', error.message);
           return;
         }
-
+        
         if (data) {
           setFirstName(data.first_name || '');
           setLastName(data.last_name || '');

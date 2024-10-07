@@ -3,8 +3,11 @@ import { View, Text, StyleSheet, Image } from "react-native";
 import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "../../supabaseClient";
+import Icon from 'react-native-vector-icons/Ionicons'; // Import the icon
+import { Link } from "expo-router"; // Import Link from expo-router
 
 const CustomDrawerContent = (props) => {
+  const { profileUpdated } = props; // Remove navigation from props
   const user = useUser();
   const [profile, setProfile] = useState({ firstName: '', lastName: '', role: '', profilePic: '' });
 
@@ -13,38 +16,38 @@ const CustomDrawerContent = (props) => {
       if (user) {
         const { data, error } = await supabase
           .from('profiles')
-          .select('first_name, last_name, role, profile_pic') // Include profile_pic in the select statement
+          .select('first_name, last_name, role, profile_pic')
           .eq('id', user.id)
           .single();
 
         if (error) {
           console.error("Error fetching profile:", error.message);
         } else if (data) {
-          setProfile({ 
-            firstName: data.first_name || '', 
-            lastName: data.last_name || '', 
-            role: data.role || '', 
-            profilePic: data.profile_pic || '' // Set profile_pic to the state
+          setProfile({
+            firstName: data.first_name || '',
+            lastName: data.last_name || '',
+            role: data.role || '',
+            profilePic: data.profile_pic || ''
           });
         }
       }
     };
 
     fetchProfile();
-  }, [user]);
+  }, [user, profileUpdated]);
 
   return (
     <DrawerContentScrollView {...props}>
       <View style={styles.profileContainer}>
-        {profile.profilePic ? ( // Display the user's profile picture if available
-          <Image 
-            source={{ uri: profile.profilePic }} 
-            style={styles.profileImage} 
+        {profile.profilePic ? (
+          <Image
+            source={{ uri: profile.profilePic }}
+            style={styles.profileImage}
           />
         ) : (
-          <Image 
-            source={{ uri: 'https://via.placeholder.com/80' }} // Placeholder if no profile picture
-            style={styles.profileImage} 
+          <Image
+            source={{ uri: 'https://via.placeholder.com/80' }}
+            style={styles.profileImage}
           />
         )}
         <Text style={styles.profileName}>
@@ -55,10 +58,15 @@ const CustomDrawerContent = (props) => {
         </Text>
       </View>
 
-      {/* Horizontal line divider */}
+      <View style={styles.notificationContainer}>
+        <Link href="Notifications"> {/* Use the correct path to route to notifications */}
+          <Icon name="notifications-outline" size={24} color="#000" />
+        </Link>
+      </View>
+
+
       <View style={styles.divider} />
 
-      {/* Drawer items */}
       <DrawerItemList {...props} />
     </DrawerContentScrollView>
   );
@@ -82,10 +90,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   divider: {
-    borderBottomColor: '#ccc',  
-    borderBottomWidth: 1,      
-    marginHorizontal: 20,       
-    marginBottom: 20,          
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  notificationContainer: {
+    alignItems: 'flex-end', // Align the bell icon to the right
+    padding: 10,
   },
 });
 

@@ -25,7 +25,7 @@ const Logout = () => {
       { cancelable: false }
     );
   };
-
+  
   async function signOut() {
     setLoading(true); // Set loading to true
     await supabase.auth.signOut();

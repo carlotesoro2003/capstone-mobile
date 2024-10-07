@@ -13,6 +13,8 @@ import DepartmentProfile from "./components/DepartmentHead/DepartmentProfile";
 import Login from "./components/Login";
 import Logout from "./components/Logout";
 
+import Notifications from "./components/Notfications/Notifications";
+
 import CustomDrawerContent from "./components/CustomDrawer";
 
 const Drawer = createDrawerNavigator();
@@ -86,13 +88,14 @@ const Main = () => {
           <Drawer.Screen
             name="AdminDashboard"
             component={AdminDashboard}
-            options={{ title: 'Dashboard' }}
+            options={{ title: 'EuCorp' }}
           />
           <Drawer.Screen
             name="AdminProfile"
             component={AdminProfile}
             options={{ title: 'My Profile' }}
           />
+          
           <Drawer.Screen
             name="Logout"
             component={Logout}

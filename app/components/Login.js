@@ -100,11 +100,8 @@ export default function Login() {
         ) : (
           <Text style={styles.loginText}>Send Magic Link</Text>
         )}
-      </TouchableOpacity>
-      
-      <TouchableOpacity onPress={() => Alert.alert("Forgot Password", "Password reset link will be sent.")}>
-        <Text style={styles.forgotText}>Forgot your password?</Text>
-      </TouchableOpacity>
+      </TouchableOpacity>      
+
     </View>
   );
 }

@@ -1,156 +1,273 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, Dimensions, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
-import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'; // For Supabase client and user state
+import React from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
+  Platform,
+  StatusBar,
+} from "react-native";
+import { PieChart } from "react-native-gifted-charts";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { Link } from "expo-router";
+import Feather from "@expo/vector-icons/Feather";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
-const screenWidth = Dimensions.get('window').width;
-const screenHeight = Dimensions.get('window').height; // Get screen height for better scaling
+const COLORS = {
+  MANPOWER: "#999999",
+  FINANCIAL: "#777777",
+  ENVIRONMENTAL: "#555555",
+  SAFETY: "#111111",
+};
 
-const DepartmentDashboard = () => {
-  const supabase = useSupabaseClient();
-  const user = useUser();
-  const [loading, setLoading] = useState(false); // Loading state   
+const VALUES = {
+  MANPOWER: 53,
+  FINANCIAL: 21,
+  ENVIRONMENTAL: 13,
+  SAFETY: 10,
+};
 
-  async function signOut() {
-    setLoading(true); // Set loading to true
-    await supabase.auth.signOut();
-    setLoading(false); // Set loading to false after sign out
-  }
+const pieData = [
+  {
+    value: VALUES.MANPOWER,
+    color: COLORS.MANPOWER,
+    label: "Manpower",
+  },
+  {
+    value: VALUES.FINANCIAL,
+    color: COLORS.FINANCIAL,
+    label: "Financial",
+  },
+  {
+    value: VALUES.ENVIRONMENTAL,
+    color: COLORS.ENVIRONMENTAL,
+    label: "Environmental",
+  },
+  {
+    value: VALUES.SAFETY,
+    color: COLORS.SAFETY,
+    label: "Safety",
+  },
+];
 
-  const lineData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    datasets: [
-      {
-        data: [50, 80, 40, 90, 70, 100],
-      },
-    ],
+const departmentsData = [
+  { name: "CCMS", plans: 36 },
+  { name: "CENG", plans: 25 },
+  { name: "CAFA", plans: 24 },
+  { name: "CBA", plans: 22 },
+  { name: "CNAHS", plans: 18 },
+];
+
+const AdminDashboard = () => {
+  const renderDot = (color) => {
+    return (
+      <View
+        style={{
+          height: 10,
+          width: 10,
+          borderRadius: 5,
+          backgroundColor: color,
+          marginRight: 10,
+        }}
+      />
+    );
   };
 
-  const barData = {
-    labels: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-    datasets: [
-      {
-        data: [40, 60, 80, 100, 50],
-      },
-    ],
+  const renderLegendComponent = () => {
+    return (
+      <>
+        <View style={styles.legendContainer}>
+          <View style={styles.legendRow}>
+            {renderDot(COLORS.MANPOWER)}
+            <Text style={styles.legendText}>Manpower: {VALUES.MANPOWER}%</Text>
+          </View>
+          <View style={styles.legendRow}>
+            {renderDot(COLORS.ENVIRONMENTAL)}
+            <Text style={styles.legendText}>
+              Environmental: {VALUES.ENVIRONMENTAL}%
+            </Text>
+          </View>
+        </View>
+        <View style={styles.legendContainer}>
+          <View style={styles.legendRow}>
+            {renderDot(COLORS.FINANCIAL)}
+            <Text style={styles.legendText}>
+              Financial: {VALUES.FINANCIAL}%
+            </Text>
+          </View>
+          <View style={styles.legendRow}>
+            {renderDot(COLORS.SAFETY)}
+            <Text style={styles.legendText}>Safety: {VALUES.SAFETY}%</Text>
+          </View>
+        </View>
+      </>
+    );
   };
 
-  const pieData = [
-    { name: 'Marketing', population: 95, color: '#f00', legendFontColor: '#7F7F7F', legendFontSize: 12 }, // Smaller font size for mobile
-    { name: 'Sales', population: 25, color: '#0f0', legendFontColor: '#7F7F7F', legendFontSize: 12 },
-    { name: 'Development', population: 20, color: '#00f', legendFontColor: '#7F7F7F', legendFontSize: 12 },
-    { name: 'Customer Support', population: 10, color: '#ff0', legendFontColor: '#7F7F7F', legendFontSize: 12 },
-  ];
+  const handleDepartmentPress = (departmentName) => {
+    console.log(`Department ${departmentName} clicked`);
+  };
+
+  const handlePieSectionPress = (section) => {
+    console.log(`${section.label} section clicked`);
+  };
+
+  const renderDepartmentPlans = () => {
+    return departmentsData.map((department) => (
+      <TouchableOpacity
+        key={department.name}
+        onPress={() => handleDepartmentPress(department.name)}
+      >
+        <View style={styles.departmentRow}>
+          <Text style={styles.departmentName}>{department.name}</Text>
+          <View style={styles.plansContainer}>
+            <Text style={styles.departmentPlans}>{department.plans}</Text>
+            <MaterialIcons name="arrow-right" size={28} color="black" />
+          </View>
+        </View>
+      </TouchableOpacity>
+    ));
+  };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Department Dashboard</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" hidden={false}></StatusBar>
+      <View style={styles.headerContainer}>
+        <Text style={styles.appName}>EUCorp</Text>
+        <Link href="/notification-stack">
+          <Ionicons name="notifications" size={24} color="black" />
+        </Link>
+      </View>
 
-      {/* Loading Spinner */}
-      {loading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007bff" />
-          <Text style={styles.loadingText}>Loading...</Text>
+      <ScrollView style={{ flex: 1 }}>
+        <View style={styles.cardContainer}>
+          <View style={styles.risksCard}>
+            <Text style={styles.risksTitle}>Risks</Text>
+            <View style={styles.pieChartContainer}>
+              <PieChart
+                donut
+                data={pieData.map((section) => ({
+                  ...section,
+                  onPress: () => handlePieSectionPress(section),
+                }))}
+                sectionAutoFocus
+                radius={120}
+                innerRadius={60}
+                innerCircleColor={"white"}
+                centerLabelComponent={() => {
+                  return (
+                    <View>
+                      <Feather
+                        name="alert-triangle"
+                        size={50}
+                        color={"#F35454"}
+                      />
+                    </View>
+                  );
+                }}
+              />
+            </View>
+            {renderLegendComponent()}
+            <Link href="/index" style={styles.arrowContainer}>
+              <MaterialIcons name="arrow-forward" size={24} color="black" />
+            </Link>
+          </View>
         </View>
-      )}
 
-      {/* Line Chart */}
-      <Text style={styles.chartTitle}>Income Trend</Text>
-      <LineChart
-        data={lineData}
-        width={screenWidth * 0.95} // Reduce width to fit the screen with padding
-        height={220}
-        chartConfig={chartConfig}
-        bezier
-        style={styles.chart}
-      />
-
-      {/* Bar Chart */}
-      <Text style={styles.chartTitle}>Weekly Sales</Text>
-      <BarChart
-        data={barData}
-        width={screenWidth * 0.95} // Reduce width for better fit
-        height={220}
-        yAxisLabel="$"
-        chartConfig={chartConfig}
-        style={styles.chart}
-      />
-
-      {/* Pie Chart */}
-      <Text style={styles.chartTitle}>Expense Breakdown</Text>
-      <PieChart
-        data={pieData}
-        width={screenWidth * 0.95} // Slightly reduce width to fit the screen
-        height={220}
-        chartConfig={chartConfig}
-        accessor="population"
-        backgroundColor="transparent"
-        paddingLeft="15"
-        absolute
-        style={styles.chart}
-      />
-
-      {/* Sign Out Button */}
-      <TouchableOpacity style={styles.signOutButton} onPress={signOut} disabled={loading}>
-        <Text style={styles.signOutText}>{loading ? 'Signing Out...' : 'Sign Out'}</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <View style={styles.cardContainer}>
+          <View style={styles.risksCard}>
+            <Text style={styles.risksTitle}>Plans</Text>
+            <Link href="/departments" style={styles.arrowContainer}>
+              <MaterialIcons name="arrow-forward" size={24} color="black" />
+            </Link>
+            {renderDepartmentPlans()}
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
-const chartConfig = {
-  backgroundGradientFrom: '#fff',
-  backgroundGradientTo: '#fff',
-  color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
-  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-  strokeWidth: 2, // optional, default 3
-  barPercentage: 0.5,
-};
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    padding: 10,
-    backgroundColor: '#f8f9fa',
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 8 : 0,
   },
-  header: {
-    fontSize: screenHeight * 0.03, // Responsive font size based on screen height
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
-  chartTitle: {
-    fontSize: screenHeight * 0.025, // Adjusted font size
-    fontWeight: 'bold',
-    marginVertical: 10,
+  appName: {
+    fontSize: 30,
+    fontWeight: "bold",
+    color: "black",
   },
-  chart: {
-    marginVertical: 8,
-    borderRadius: 16,
+  cardContainer: {
+    position: "relative",
   },
-  signOutButton: {
-    marginVertical: 20,
-    backgroundColor: '#ff4d4d',
-    padding: screenHeight * 0.015, // Responsive padding
-    borderRadius: 8,
-    alignItems: 'center',
+  risksCard: {
+    margin: 20,
+    padding: 20,
+    borderRadius: 14,
+    backgroundColor: "white",
   },
-  signOutText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: screenHeight * 0.02, // Responsive text size
+  risksTitle: {
+    color: "black",
+    fontSize: 24,
+    fontWeight: "bold",
   },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 20,
+  pieChartContainer: {
+    padding: 20,
+    alignItems: "center",
   },
-  loadingText: {
-    marginTop: 10,
-    fontSize: screenHeight * 0.02, // Responsive font size
-    color: '#007bff',
+  legendContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+  legendRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: 120,
+    marginRight: 20,
+  },
+  legendText: {
+    color: "black",
+    fontSize: 11,
+  },
+  departmentRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 14,
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+  },
+  plansContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  departmentName: {
+    color: "black",
+    fontSize: 16,
+  },
+  departmentPlans: {
+    color: "black",
+    fontWeight: "bold",
+    fontSize: 26,
+    marginRight: 5,
+  },
+  arrowContainer: {
+    position: "absolute",
+    top: 10,
+    right: 10,
   },
 });
 
-export default DepartmentDashboard;
+export default AdminDashboard;

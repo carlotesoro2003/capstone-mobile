@@ -149,6 +149,7 @@ const AdminDashboard = () => {
                 }))}
                 sectionAutoFocus
                 radius={120}
+                focusOnPress
                 innerRadius={60}
                 innerCircleColor={"white"}
                 centerLabelComponent={() => {

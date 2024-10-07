@@ -1,19 +1,10 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-  Platform,
-  StatusBar,
-} from "react-native";
+import {View,Text,StyleSheet,ScrollView,TouchableOpacity,SafeAreaView,Platform,StatusBar} from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Link } from "expo-router";
 import Feather from "@expo/vector-icons/Feather";
-import Ionicons from "@expo/vector-icons/Ionicons";
+
 
 const COLORS = {
   MANPOWER: "#999999",
@@ -175,7 +166,7 @@ const AdminDashboard = () => {
         <View style={styles.cardContainer}>
           <View style={styles.risksCard}>
             <Text style={styles.risksTitle}>Plans</Text>
-            <Link href="/departments" style={styles.arrowContainer}>
+            <Link href="AdminPlans" style={styles.arrowContainer}>
               <MaterialIcons name="arrow-forward" size={24} color="black" />
             </Link>
             {renderDepartmentPlans()}

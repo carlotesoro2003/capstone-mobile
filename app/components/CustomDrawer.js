@@ -58,12 +58,6 @@ const CustomDrawerContent = (props) => {
         </Text>
       </View>
 
-      <View style={styles.notificationContainer}>
-        <Link href="Notifications"> {/* Use the correct path to route to notifications */}
-          <Icon name="notifications-outline" size={24} color="#000" />
-        </Link>
-      </View>
-
 
       <View style={styles.divider} />
 

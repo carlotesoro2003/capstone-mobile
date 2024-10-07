@@ -1,19 +1,10 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-  Platform,
-  StatusBar,
-} from "react-native";
+import {View,Text,StyleSheet,ScrollView,TouchableOpacity,SafeAreaView,Platform,StatusBar} from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Link } from "expo-router";
 import Feather from "@expo/vector-icons/Feather";
-import Ionicons from "@expo/vector-icons/Ionicons";
+
 
 const COLORS = {
   MANPOWER: "#999999",
@@ -60,7 +51,7 @@ const departmentsData = [
   { name: "CNAHS", plans: 18 },
 ];
 
-const AdminDashboard = () => {
+const DepartmentDashboard = () => {
   const renderDot = (color) => {
     return (
       <View
@@ -134,12 +125,7 @@ const AdminDashboard = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" hidden={false}></StatusBar>
-      <View style={styles.headerContainer}>
-        <Text style={styles.appName}>EUCorp</Text>
-        <Link href="/notification-stack">
-          <Ionicons name="notifications" size={24} color="black" />
-        </Link>
-      </View>
+
 
       <ScrollView style={{ flex: 1 }}>
         <View style={styles.cardContainer}>
@@ -154,6 +140,7 @@ const AdminDashboard = () => {
                 }))}
                 sectionAutoFocus
                 radius={120}
+                focusOnPress
                 innerRadius={60}
                 innerCircleColor={"white"}
                 centerLabelComponent={() => {
@@ -170,7 +157,7 @@ const AdminDashboard = () => {
               />
             </View>
             {renderLegendComponent()}
-            <Link href="/index" style={styles.arrowContainer}>
+            <Link href="DepartmentRisks" style={styles.arrowContainer}>
               <MaterialIcons name="arrow-forward" size={24} color="black" />
             </Link>
           </View>
@@ -179,7 +166,7 @@ const AdminDashboard = () => {
         <View style={styles.cardContainer}>
           <View style={styles.risksCard}>
             <Text style={styles.risksTitle}>Plans</Text>
-            <Link href="/departments" style={styles.arrowContainer}>
+            <Link href="DepartmentPlans" style={styles.arrowContainer}>
               <MaterialIcons name="arrow-forward" size={24} color="black" />
             </Link>
             {renderDepartmentPlans()}
@@ -270,4 +257,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AdminDashboard;
+export default DepartmentDashboard;

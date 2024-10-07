@@ -6,16 +6,12 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import AdminDashboard from "./components/Admin/AdminDashboard";
 import AdminProfile from "./components/Admin/AdminProfile";
-
 import DepartmentDashboard from "./components/DepartmentHead/DepartmentDashboard";
 import DepartmentProfile from "./components/DepartmentHead/DepartmentProfile";
-
 import Login from "./components/Login";
 import Logout from "./components/Logout";
-
-import Notifications from "./components/Notfications/Notifications";
-
 import CustomDrawerContent from "./components/CustomDrawer";
+import CustomHeader from './components/CustomHeader'; // Import your custom header
 
 const Drawer = createDrawerNavigator();
 
@@ -36,7 +32,6 @@ const Main = () => {
             .single();
 
           if (error && error.code === 'PGRST116') {
-            // Insert a new profile with a default role
             const { error: insertError } = await supabase
               .from("profiles")
               .insert([{ id: user.id, email: user.email, role: "user" }]);
@@ -45,18 +40,18 @@ const Main = () => {
               alert("Error adding to profiles table: " + insertError.message);
             } else {
               alert("User added to profiles table");
-              setRole("user"); // Set default role to user
+              setRole("user");
             }
           } else if (data) {
-            setRole(data.role); // Set role from existing profile
+            setRole(data.role);
           }
         } catch (error) {
           console.error("Error fetching user role:", error);
         } finally {
-          setLoading(false); // Stop loading when done
+          setLoading(false);
         }
       } else {
-        setLoading(false); // Stop loading if no user
+        setLoading(false);
       }
     };
 
@@ -64,7 +59,6 @@ const Main = () => {
   }, [user]);
 
   if (loading) {
-    // Render a loading state while checking role
     return (
       <View style={styles.container}>
         <Text>Loading...</Text>
@@ -72,30 +66,31 @@ const Main = () => {
     );
   }
 
-  // Render Login screen when not authenticated
   if (!session) {
     return <Login />;
   }
 
-  // Render only when role is available
   return role ? (
     <Drawer.Navigator
       initialRouteName={role === "admin" ? "AdminDashboard" : "DepartmentDashboard"}
-      drawerContent={(props) => <CustomDrawerContent {...props} />}  // Use custom drawer
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        headerShown: true,
+        header: (props) => <CustomHeader {...props} />, // Pass navigation prop to CustomHeader
+      }}
     >
       {role === "admin" ? (
         <>
           <Drawer.Screen
             name="AdminDashboard"
             component={AdminDashboard}
-            options={{ title: 'EuCorp' }}
+            options={{ title: 'Dashboard' }}
           />
           <Drawer.Screen
             name="AdminProfile"
             component={AdminProfile}
             options={{ title: 'My Profile' }}
           />
-          
           <Drawer.Screen
             name="Logout"
             component={Logout}
@@ -114,7 +109,7 @@ const Main = () => {
             component={DepartmentProfile}
             options={{ title: 'Profile' }}
           />
-             <Drawer.Screen
+          <Drawer.Screen
             name="Logout"
             component={Logout}
             options={{ title: 'Log Out' }}
@@ -122,7 +117,7 @@ const Main = () => {
         </>
       )}
     </Drawer.Navigator>
-  ) : null; // Render nothing if role is not available
+  ) : null;
 };
 
 export default function Page() {

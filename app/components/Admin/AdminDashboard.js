@@ -126,6 +126,10 @@ const AdminDashboard = () => {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" hidden={false}></StatusBar>
 
+      <View style={styles.headerContainer}>
+        <Text style={styles.appName}>Admin Dashboard</Text>
+      </View>
+
 
       <ScrollView style={{ flex: 1 }}>
         <View style={styles.cardContainer}>
@@ -157,8 +161,12 @@ const AdminDashboard = () => {
               />
             </View>
             {renderLegendComponent()}
-            <Link href="/index" style={styles.arrowContainer}>
-              <MaterialIcons name="arrow-forward" size={24} color="black" />
+            <Link href="AdminRisks" style={styles.arrowContainer}>
+               <MaterialIcons
+                  name="arrow-forward-ios"
+                  size={24}
+                  color="black"
+                />
             </Link>
           </View>
         </View>
@@ -167,7 +175,11 @@ const AdminDashboard = () => {
           <View style={styles.risksCard}>
             <Text style={styles.risksTitle}>Plans</Text>
             <Link href="AdminPlans" style={styles.arrowContainer}>
-              <MaterialIcons name="arrow-forward" size={24} color="black" />
+               <MaterialIcons
+                  name="arrow-forward-ios"
+                  size={24}
+                  color="black"
+                />
             </Link>
             {renderDepartmentPlans()}
           </View>

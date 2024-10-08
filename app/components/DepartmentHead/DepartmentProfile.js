@@ -13,14 +13,15 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from '../../../supabaseClient';
- 
+
 const DepartmentProfile = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [profilePic, setProfilePic] = useState(null); // State for profile picture
+  const [profilePic, setProfilePic] = useState(null);
   const [profileExists, setProfileExists] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false); // State to track if there are changes
   const user = useUser();
 
   useEffect(() => {
@@ -42,7 +43,7 @@ const DepartmentProfile = () => {
         if (data) {
           setFirstName(data.first_name || '');
           setLastName(data.last_name || '');
-          setProfilePic(data.profile_pic || null); // Load profile pic
+          setProfilePic(data.profile_pic || null);
           setProfileExists(true);
         }
       }
@@ -50,6 +51,13 @@ const DepartmentProfile = () => {
 
     loadProfile();
   }, [user]);
+
+  // Update hasChanges based on profile fields
+  useEffect(() => {
+    setHasChanges(
+      firstName !== '' || lastName !== '' || profilePic !== null
+    );
+  }, [firstName, lastName, profilePic]);
 
   const handleInsert = async () => {
     const { error } = await supabase
@@ -59,7 +67,7 @@ const DepartmentProfile = () => {
         first_name: firstName,
         last_name: lastName,
         email: email,
-        profile_pic: profilePic, // Save profile picture URL
+        profile_pic: profilePic,
       });
 
     if (error) {
@@ -77,7 +85,7 @@ const DepartmentProfile = () => {
       .update({
         first_name: firstName,
         last_name: lastName,
-        profile_pic: profilePic, // Update profile picture URL
+        profile_pic: profilePic,
       })
       .eq('id', user.id);
 
@@ -101,7 +109,6 @@ const DepartmentProfile = () => {
   };
 
   const pickImage = async () => {
-    // Request permission to access the camera roll
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (permissionResult.granted === false) {
@@ -109,7 +116,6 @@ const DepartmentProfile = () => {
       return;
     }
 
-    // Launch image picker
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
@@ -117,9 +123,8 @@ const DepartmentProfile = () => {
       quality: 1,
     });
 
-    // Check if user canceled the image picker
     if (!result.canceled) {
-      setProfilePic(result.assets[0].uri); // Set the selected image URI
+      setProfilePic(result.assets[0].uri);
     }
   };
 
@@ -134,8 +139,8 @@ const DepartmentProfile = () => {
         ) : (
           <Text style={styles.imagePlaceholder}>Pick a Profile Picture</Text>
         )}
-        <TouchableOpacity style={styles.editButton} onPress={pickImage}>
-          <Text style={styles.editButtonText}>+</Text>
+        <TouchableOpacity onPress={pickImage} style={styles.editButton}>
+          <Text style={styles.hoverText}>Select Profile Picture</Text>
         </TouchableOpacity>
       </View>
 
@@ -174,7 +179,11 @@ const DepartmentProfile = () => {
       {loading ? (
         <ActivityIndicator size="large" color="#007bff" />
       ) : (
-        <TouchableOpacity style={styles.button} onPress={handleSave}>
+        <TouchableOpacity
+          style={[styles.button, { opacity: hasChanges ? 1 : 0.5 }]} // Change opacity based on hasChanges
+          onPress={handleSave}
+          disabled={!hasChanges} // Disable the button if there are no changes
+        >
           <Text style={styles.buttonText}>Save Changes</Text>
         </TouchableOpacity>
       )}
@@ -198,7 +207,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     alignItems: 'center',
     marginBottom: 20,
-    position: 'relative', // Add position relative for absolute positioning
+    position: 'relative',
   },
   profileImage: {
     width: 100,
@@ -211,20 +220,14 @@ const styles = StyleSheet.create({
     color: '#aaa',
   },
   editButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#007bff',
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 2, // Adds a shadow effect
+    marginTop: 10, // Optional: Adjust spacing if needed
   },
-  editButtonText: {
-    color: '#fff',
-    fontSize: 18,
+  hoverText: {
+    color: '#007bff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: 14,
+    opacity: 0.7,
   },
   inputContainer: {
     marginBottom: 15,

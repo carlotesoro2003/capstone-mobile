@@ -42,13 +42,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f5f5f5', // Light background for better contrast
+    backgroundColor: '#f5f5f5', 
   },
   title: {
-    fontSize: 28, // Increased font size
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#333', // Darker title color
+    color: '#333',
   },
   notificationItem: {
     flexDirection: 'row',
@@ -56,28 +56,28 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 10,
     borderRadius: 8,
-    backgroundColor: '#fff', // White background for notification cards
+    backgroundColor: '#fff', 
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 1, // For Android shadow
+    elevation: 1, 
   },
   iconContainer: {
-    marginRight: 10, // Spacing between icon and text
+    marginRight: 10, 
   },
   messageContainer: {
-    flex: 1, // Allow message container to grow
+    flex: 1, 
   },
   notificationMessage: {
     fontSize: 16,
-    fontWeight: '500', // Medium weight for better readability
-    color: '#444', // Darker text color
+    fontWeight: '500', 
+    color: '#444', 
   },
   notificationTime: {
     fontSize: 12,
     color: '#999',
-    marginTop: 4, // Add spacing above time text
+    marginTop: 4, 
   },
 });
 

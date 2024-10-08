@@ -7,7 +7,7 @@ import Icon from 'react-native-vector-icons/Ionicons'; // Import the icon
 import { Link } from "expo-router"; // Import Link from expo-router
 
 const CustomDrawerContent = (props) => {
-  const { profileUpdated } = props; // Remove navigation from props
+  const { profileUpdated } = props; 
   const user = useUser();
   const [profile, setProfile] = useState({ firstName: '', lastName: '', role: '', profilePic: '' });
 
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   notificationContainer: {
-    alignItems: 'flex-end', // Align the bell icon to the right
+    alignItems: 'flex-end', 
     padding: 10,
   },
 });

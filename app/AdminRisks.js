@@ -6,11 +6,10 @@ import {
   FlatList,
   SafeAreaView,
   StatusBar,
-  TouchableOpacity,
-  ScrollView,
 } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 import Feather from "@expo/vector-icons/Feather";
+import RNPickerSelect from "react-native-picker-select";
 
 const COLORS = {
   MANPOWER: "#999999",
@@ -49,45 +48,32 @@ const pieData = [
   },
 ];
 
-// Sample risk statements with categories
 const riskStatements = [
-  {
-    id: "1",
-    statement: "RRN-CCMS-01",
-    category: "Manpower",
-  },
-  {
-    id: "2",
-    statement: "RRN-CCMS-02",
-    category: "Financial",
-  },
-  {
-    id: "3",
-    statement: "RRN-CCMS-03",
-    category: "Environmental",
-  },
-  {
-    id: "4",
-    statement: "RRN-CCMS-04",
-    category: "Safety",
-  },
-  {
-    id: "5",
-    statement: "RRN-CCMS-05",
-    category: "Manpower",
-  },
+  { department: "CCMS", text: "Risk Statement 1, RRN-CCMS-01" },
+  { department: "CENG", text: "Risk Statement 1, RRN-CENG-02" },
+  { department: "CBA", text: "Risk Statement 1, RRN-CBA-03" },
+  { department: "CAFA", text: "Risk Statement 1, RRN-CAFA-04" },
+  { department: "CNAHS", text: "Risk Statement 1, RRN-CNAHS-05" },
+  { department: "CCMS", text: "Risk Statement 2, RRN-CCMS-02" },
+  { department: "CENG", text: "Risk Statement 2, RRN-CENG-02" },
 ];
 
-const Risks = () => {
-  const [filter, setFilter] = useState("All"); // Create a state for the selected filter
+const departments = [
+  { label: "All", value: "All" },
+  { label: "CCMS", value: "CCMS" },
+  { label: "CENG", value: "CENG" },
+  { label: "CBA", value: "CBA" },
+  { label: "CAFA", value: "CAFA" },
+  { label: "CNAHS", value: "CNAHS" },
+];
 
-  // Function to filter risk statements based on selected filter
-  const filteredRiskStatements = riskStatements.filter((item) => {
-    if (filter === "All") {
-      return true;
-    }
-    return item.category === filter;
-  });
+const AdminRisks = () => {
+  const [selectedDepartment, setSelectedDepartment] = useState("All");
+
+  const filteredRisks =
+    selectedDepartment === "All"
+      ? riskStatements
+      : riskStatements.filter((risk) => risk.department === selectedDepartment);
 
   const renderDot = (color) => {
     return (
@@ -134,13 +120,11 @@ const Risks = () => {
     );
   };
 
+
   const renderRiskStatement = ({ item }) => {
     return (
       <View>
-        <Text style={styles.uploadedText}>
-          College of Computing and Multimedia Studies uploaded:
-        </Text>
-        <Text style={styles.riskStatementText}>{item.statement}</Text>
+        <Text style={styles.riskText}>{item.text}</Text>
         <View style={styles.separator} />
       </View>
     );
@@ -148,7 +132,7 @@ const Risks = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" hidden={false} />
+      <StatusBar barStyle="dark-content" hidden={false}></StatusBar>
       <View style={styles.cardContainer}>
         <View style={styles.risksCard}>
           <Text style={styles.risksTitle}>Risks</Text>
@@ -178,34 +162,26 @@ const Risks = () => {
           {renderLegendComponent()}
         </View>
 
-        {/* Scrollable Filter buttons */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterContainer}
-        >
-          {["All", "Manpower", "Financial", "Environmental", "Safety"].map(
-            (category) => (
-              <TouchableOpacity
-                key={category}
-                style={[
-                  styles.filterButton,
-                  filter === category && styles.activeFilterButton,
-                ]}
-                onPress={() => setFilter(category)}
-              >
-                <Text style={styles.filterButtonText}>{category}</Text>
-              </TouchableOpacity>
-            )
-          )}
-        </ScrollView>
+        {/* Dropdown Filter by Department */}
+        <View style={styles.dropdownContainer}>
+          <RNPickerSelect
+            onValueChange={(value) => setSelectedDepartment(value)}
+            items={departments.map((dept) => ({
+              label: dept.label,
+              value: dept.value,
+            }))}
+            placeholder={{ label: "Select Department", value: "All" }}
+            style={pickerSelectStyles}
+            value={selectedDepartment}
+          />
+        </View>
 
+        {/* Card for the risk statements */}
         <View style={styles.listCard}>
-          <Text style={styles.risksTitle}>Risk Report</Text>
           <FlatList
-            data={filteredRiskStatements}
+            data={filteredRisks}
             renderItem={renderRiskStatement}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item, index) => index.toString()}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 20 }}
           />
@@ -254,46 +230,51 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   listCard: {
-    margin: 20,
-    padding: 20,
+    marginHorizontal: 20, // Only horizontal margin, to avoid excess space vertically
+    paddingVertical: 30, // Increase vertical padding inside the list card
+    paddingHorizontal: 20,
     borderRadius: 14,
     backgroundColor: "white",
     height: 330,
   },
-  uploadedText: {
+  riskText: {
     color: "black",
     paddingVertical: 10,
-  },
-  riskStatementText: {
-    color: "blue", // Highlighted in blue
-    fontWeight: "bold", // Bold text
-    paddingVertical: 5,
   },
   separator: {
     height: 1,
     backgroundColor: "#e0e0e0",
     marginVertical: 5,
   },
-  filterContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginVertical: 10,
-    paddingHorizontal: 10,
-  },
-  filterButton: {
-    marginHorizontal: 5,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: "#007bff",
-    borderRadius: 8,
-  },
-  activeFilterButton: {
-    backgroundColor: "#0056b3", // Active button color
-  },
-  filterButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
+  dropdownContainer: {
+    marginHorizontal: 20, // Adjust margin so it's the same as the list card
+    marginBottom: 10, // Reduce the margin to lessen space between dropdown and list
   },
 });
 
-export default Risks;
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 4,
+    color: "black",
+    paddingRight: 30,
+    backgroundColor: "#fff",
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 8,
+    color: "black",
+    paddingRight: 30,
+    backgroundColor: "#fff",
+  },
+});
+
+export default AdminRisks;

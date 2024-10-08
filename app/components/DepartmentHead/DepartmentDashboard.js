@@ -1,10 +1,17 @@
 import React from "react";
-import {View,Text,StyleSheet,ScrollView,TouchableOpacity,SafeAreaView,Platform,StatusBar} from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  SafeAreaView,
+  Platform,
+  StatusBar,
+} from "react-native";
 import { PieChart } from "react-native-gifted-charts";
+import Feather from "@expo/vector-icons/Feather";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Link } from "expo-router";
-import Feather from "@expo/vector-icons/Feather";
-
 
 const COLORS = {
   MANPOWER: "#999999",
@@ -20,7 +27,7 @@ const VALUES = {
   SAFETY: 10,
 };
 
-const pieData = [
+const risksPieData = [
   {
     value: VALUES.MANPOWER,
     color: COLORS.MANPOWER,
@@ -43,12 +50,9 @@ const pieData = [
   },
 ];
 
-const departmentsData = [
-  { name: "CCMS", plans: 36 },
-  { name: "CENG", plans: 25 },
-  { name: "CAFA", plans: 24 },
-  { name: "CBA", plans: 22 },
-  { name: "CNAHS", plans: 18 },
+const plansPieData = [
+  { value: 70, color: "green" },
+  { value: 30, color: "lightgray" },
 ];
 
 const DepartmentDashboard = () => {
@@ -97,29 +101,8 @@ const DepartmentDashboard = () => {
     );
   };
 
-  const handleDepartmentPress = (departmentName) => {
-    console.log(`Department ${departmentName} clicked`);
-  };
-
   const handlePieSectionPress = (section) => {
     console.log(`${section.label} section clicked`);
-  };
-
-  const renderDepartmentPlans = () => {
-    return departmentsData.map((department) => (
-      <TouchableOpacity
-        key={department.name}
-        onPress={() => handleDepartmentPress(department.name)}
-      >
-        <View style={styles.departmentRow}>
-          <Text style={styles.departmentName}>{department.name}</Text>
-          <View style={styles.plansContainer}>
-            <Text style={styles.departmentPlans}>{department.plans}</Text>
-            <MaterialIcons name="arrow-right" size={28} color="black" />
-          </View>
-        </View>
-      </TouchableOpacity>
-    ));
   };
 
   return (
@@ -127,14 +110,27 @@ const DepartmentDashboard = () => {
       <StatusBar barStyle="dark-content" hidden={false}></StatusBar>
 
 
+
       <ScrollView style={{ flex: 1 }}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.appName}>Department Dashboard</Text>
+        </View>
         <View style={styles.cardContainer}>
           <View style={styles.risksCard}>
             <Text style={styles.risksTitle}>Risks</Text>
+            <View style={styles.arrowContainer}>
+              <Link href="DepartmentRisks">
+                <MaterialIcons
+                  name="arrow-forward-ios"
+                  size={24}
+                  color="black"
+                />
+              </Link>
+            </View>
             <View style={styles.pieChartContainer}>
               <PieChart
                 donut
-                data={pieData.map((section) => ({
+                data={risksPieData.map((section) => ({
                   ...section,
                   onPress: () => handlePieSectionPress(section),
                 }))}
@@ -157,26 +153,40 @@ const DepartmentDashboard = () => {
               />
             </View>
             {renderLegendComponent()}
-            <Link href="DepartmentRisks" style={styles.arrowContainer}>
-              <MaterialIcons name="arrow-forward" size={24} color="black" />
-            </Link>
           </View>
-        </View>
 
-        <View style={styles.cardContainer}>
-          <View style={styles.risksCard}>
-            <Text style={styles.risksTitle}>Plans</Text>
-            <Link href="DepartmentPlans" style={styles.arrowContainer}>
-              <MaterialIcons name="arrow-forward" size={24} color="black" />
-            </Link>
-            {renderDepartmentPlans()}
+          <View style={styles.cardContainer}>
+            <View style={styles.risksCard}>
+              <Text style={styles.risksTitle}>Plans</Text>
+              <View style={styles.arrowContainer}>
+                <Link href="DepartmentPlans">
+                  <MaterialIcons
+                    name="arrow-forward-ios"
+                    size={24}
+                    color="black"
+                  />
+                </Link>
+              </View>
+              <View style={styles.pieChartContainer}>
+                <PieChart
+                  data={plansPieData}
+                  donut
+                  innerRadius={80}
+                  centerLabelComponent={() => (
+                    <>
+                      <Text style={styles.centerLabel}>70%</Text>
+                      <Text style={styles.centerSubtitle}>Completed Plans</Text>
+                    </>
+                  )}
+                />
+              </View>
+            </View>
           </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
-
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -203,6 +213,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 14,
     backgroundColor: "white",
+    position: "relative",
   },
   risksTitle: {
     color: "black",
@@ -210,8 +221,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   pieChartContainer: {
-    padding: 20,
     alignItems: "center",
+    padding: 20,
+  },
+  arrowContainer: {
+    position: "absolute",
+    top: 10,
+    right: 10,
   },
   legendContainer: {
     flexDirection: "row",
@@ -228,32 +244,15 @@ const styles = StyleSheet.create({
     color: "black",
     fontSize: 11,
   },
-  departmentRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 14,
-    paddingVertical: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
-  },
-  plansContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  departmentName: {
-    color: "black",
-    fontSize: 16,
-  },
-  departmentPlans: {
-    color: "black",
+  centerLabel: {
+    fontSize: 36,
     fontWeight: "bold",
-    fontSize: 26,
-    marginRight: 5,
+    color: "#007bff",
   },
-  arrowContainer: {
-    position: "absolute",
-    top: 10,
-    right: 10,
+  centerSubtitle: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
   },
 });
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Link } from 'expo-router'; // Ensure this is the correct import based on your project
+import { Link } from 'expo-router'; 
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const CustomHeader = ({ navigation }) => {
@@ -11,7 +11,7 @@ const CustomHeader = ({ navigation }) => {
         name="menu" 
         size={24} 
         color="#000" 
-        onPress={() => navigation.toggleDrawer()} // Toggle drawer on press
+        onPress={() => navigation.toggleDrawer()} 
         style={styles.menuIcon} 
       />
       
@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     backgroundColor: '#fff',
-    elevation: 2, // Add some elevation for Android shadow
+    elevation: 2, 
   },
   menuIcon: {
     padding: 8,

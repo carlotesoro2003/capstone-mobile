@@ -13,10 +13,10 @@ import * as QueryParams from "expo-auth-session/build/QueryParams";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
 import { supabase } from "../../supabaseClient";
-import { FontAwesome } from "@expo/vector-icons"; // For icons
+import { FontAwesome } from "@expo/vector-icons"; 
 
-WebBrowser.maybeCompleteAuthSession(); // Required for web only
-const redirectTo = makeRedirectUri(); // Create a redirect URI
+WebBrowser.maybeCompleteAuthSession(); 
+const redirectTo = makeRedirectUri();
 
 const createSessionFromUrl = async (url) => {
   const { params, errorCode } = QueryParams.getQueryParams(url);
@@ -47,8 +47,8 @@ const sendMagicLink = async (email) => {
 };
 
 export default function Login() {
-  const [email, setEmail] = useState(""); // State for email input
-  const [loading, setLoading] = useState(false); // State for loading indicator
+  const [email, setEmail] = useState(""); 
+  const [loading, setLoading] = useState(false); 
   const url = Linking.useURL(); // Get URL to handle deep links
 
   useEffect(() => {
@@ -61,12 +61,12 @@ export default function Login() {
     setLoading(true); // Set loading state
     try {
       await sendMagicLink(email); // Send the magic link
-      Alert.alert("Check your email", "Magic link sent!"); // Show success alert
-      alert("Check your email for the magic link."); // Show success alert
+      Alert.alert("Check your email", "Magic link sent!"); 
+      alert("Check your email for the magic link."); 
     } catch (error) {
-      Alert.alert("Error", error.message); // Show error alert
+      Alert.alert("Error", error.message);
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false); 
     }
   };
 
@@ -98,7 +98,7 @@ export default function Login() {
         {loading ? (
           <ActivityIndicator size="small" color="#ffffff" />
         ) : (
-          <Text style={styles.loginText}>Send Magic Link</Text>
+          <Text style={styles.loginText}>Create email link</Text>
         )}
       </TouchableOpacity>      
 

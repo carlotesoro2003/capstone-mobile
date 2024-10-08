@@ -4,14 +4,18 @@ import { supabase } from "../supabaseClient";
 import { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { createDrawerNavigator } from '@react-navigation/drawer';
+
 import AdminDashboard from "./components/Admin/AdminDashboard";
 import AdminProfile from "./components/Admin/AdminProfile";
+
 import DepartmentDashboard from "./components/DepartmentHead/DepartmentDashboard";
 import DepartmentProfile from "./components/DepartmentHead/DepartmentProfile";
+
 import Login from "./components/Login";
 import Logout from "./components/Logout";
+
 import CustomDrawerContent from "./components/CustomDrawer";
-import CustomHeader from './components/CustomHeader'; // Import your custom header
+import CustomHeader from './components/CustomHeader'; 
 
 const Drawer = createDrawerNavigator();
 
@@ -76,7 +80,7 @@ const Main = () => {
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         headerShown: true,
-        header: (props) => <CustomHeader {...props} />, // Pass navigation prop to CustomHeader
+        header: (props) => <CustomHeader {...props} />, 
       }}
     >
       {role === "admin" ? (
